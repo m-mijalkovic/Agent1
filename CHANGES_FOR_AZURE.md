@@ -104,7 +104,7 @@ except ImportError:
 - Falls back to built-in sqlite3 on Windows (where newer version exists)
 - **Critical fix** - without this, application fails to start on Azure
 
-**Package Added to requirements.txt**: `pysqlite3-binary==0.5.4.post1`
+**Package Added to requirements.txt**: `pysqlite3-binary==0.5.4.post2`
 
 ### 2. **static/index.html**
 

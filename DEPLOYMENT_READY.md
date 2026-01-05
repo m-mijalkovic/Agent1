@@ -11,7 +11,7 @@ Your application is now fully configured and ready for Azure Web App deployment!
 
 **Solution**: Added pysqlite3-binary workaround
 - **File Modified**: `main.py` (lines 1-11)
-- **Package Added**: `pysqlite3-binary==0.5.4.post1` in requirements.txt
+- **Package Added**: `pysqlite3-binary==0.5.4.post2` in requirements.txt
 - **How it works**: Replaces built-in sqlite3 with newer version on Azure
 
 **Status**: ✅ Fixed and tested locally
@@ -151,7 +151,7 @@ git push azure main
 
 ### 4. Expected Logs
 ```
-Successfully installed pysqlite3-binary-0.5.4.post1
+Successfully installed pysqlite3-binary-0.5.4.post2
 Successfully installed langchain-chroma-1.1.0
 ...
 Vector store initialized successfully (empty - ready for document uploads via UI)

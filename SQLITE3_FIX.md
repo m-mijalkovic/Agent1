@@ -39,10 +39,10 @@ except ImportError:
 - Falls back to built-in `sqlite3` if `pysqlite3` is not available (e.g., on Windows)
 - Must be executed BEFORE any imports that depend on sqlite3/chromadb
 
-#### 2. Added Package to `requirements.txt` (Line 137)
+#### 2. Added Package to `requirements.txt` (Line 138)
 
 ```
-pysqlite3-binary==0.5.4.post1
+pysqlite3-binary==0.5.4.post2
 ```
 
 This package will be installed automatically during Azure deployment.
@@ -82,7 +82,7 @@ On Azure App Service:
 ### 1. Check Requirements Installation
 After deployment, verify in Azure logs:
 ```
-Successfully installed pysqlite3-binary-0.5.4.post1
+Successfully installed pysqlite3-binary-0.5.4.post2
 ```
 
 ### 2. Check Application Startup

@@ -135,6 +135,6 @@ zstandard==0.25.0
 gunicorn==23.0.0
 
 # SQLite3 upgrade for Azure App Service (Chroma requirement)
-pysqlite3-binary==0.5.4.post1
+pysqlite3-binary==0.5.4.post2
 
 ##
