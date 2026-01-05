@@ -1,3 +1,15 @@
+# Workaround for Azure App Service SQLite3 version issue
+# Azure has SQLite3 < 3.35.0, but Chroma requires >= 3.35.0
+# This replaces the built-in sqlite3 with pysqlite3-binary
+try:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    # pysqlite3-binary not available (e.g., on Windows dev environment)
+    # This is fine - use the built-in sqlite3
+    pass
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse

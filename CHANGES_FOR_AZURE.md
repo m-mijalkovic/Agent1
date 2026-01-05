@@ -85,6 +85,27 @@ def initialize_vector_store():
 - Users can upload all documents via UI
 - More flexible for cloud deployment
 
+#### Change 4: SQLite3 Version Workaround (Lines 1-11)
+**Added**:
+```python
+# Workaround for Azure App Service SQLite3 version issue
+try:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass
+```
+
+**Reason**:
+- Azure App Service has SQLite3 < 3.35.0
+- Chroma requires SQLite3 >= 3.35.0
+- This replaces built-in sqlite3 with pysqlite3-binary on Azure
+- Falls back to built-in sqlite3 on Windows (where newer version exists)
+- **Critical fix** - without this, application fails to start on Azure
+
+**Package Added to requirements.txt**: `pysqlite3-binary==0.5.4.post1`
+
 ### 2. **static/index.html**
 
 #### Change 1: Updated RAG Endpoint URL (Line 343)
