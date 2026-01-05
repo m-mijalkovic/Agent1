@@ -61,6 +61,30 @@ async def read_root():
 
 **Reason**: Reminds developers to update CORS for production security
 
+#### Change 3: Vector Store Initialization (Lines 136-179)
+**Before**:
+```python
+def load_documents():
+    """Load documents from the documents folder and create vector store"""
+    # Required documents folder with .txt files
+    # Failed if folder missing or empty
+```
+
+**After**:
+```python
+def initialize_vector_store():
+    """Initialize an empty vector store for document uploads via UI"""
+    # Creates empty Chroma vector store
+    # Optionally loads documents from folder if it exists
+    # No failure if folder missing - ready for UI uploads
+```
+
+**Reason**:
+- Fixes Azure deployment issue where documents folder may not exist
+- Allows application to start successfully without pre-loaded documents
+- Users can upload all documents via UI
+- More flexible for cloud deployment
+
 ### 2. **static/index.html**
 
 #### Change 1: Updated RAG Endpoint URL (Line 343)
@@ -127,25 +151,34 @@ These must be set in Azure App Service Configuration:
 
 ### 1. Vector Store Persistence
 ⚠️ **Current Implementation**: In-memory Chroma vector store
-- Vector store is rebuilt on every app restart
-- Uploaded documents are lost on restart
-- Documents folder is loaded on startup
+- Vector store initializes **empty** on every app restart
+- Uploaded documents are stored in-memory only (lost on restart)
+- Optional: Documents in `documents/` folder are loaded if folder exists
+- **No dependency on pre-existing documents** - app starts successfully even with empty folder
 
 **Production Recommendation**:
 - Use persistent storage (Azure Cosmos DB, Azure AI Search, or Pinecone)
 - Store uploaded files in Azure Blob Storage
+- Implement auto-reload from Blob Storage on startup
 
 ### 2. File Storage
-⚠️ **Azure App Service File System**: Ephemeral (temporary)
-- Files uploaded at runtime are lost on restart
-- `/documents` folder in deployment is persistent
+⚠️ **Current Implementation**: UI-driven document management
+- Users upload documents exclusively through the UI
+- All uploads are stored in-memory (not persisted)
+- Optional: Pre-load documents from `documents/` folder if it exists
+- **Azure-friendly**: No requirement for documents folder to exist
 
-**Recommendation**: Implement Azure Blob Storage for user uploads
+⚠️ **Azure App Service File System**: Ephemeral (temporary)
+- Files uploaded via UI at runtime are lost on restart
+- `/documents` folder in deployment is persistent (if included)
+
+**Recommendation**: Implement Azure Blob Storage for persistent user uploads
 
 ### 3. Startup Time
-- Initial startup may take 2-5 minutes
-- Document loading happens during startup
-- Consider lazy loading for large document sets
+- Initial startup: 10-30 seconds (no document loading required)
+- Faster startup compared to loading many documents
+- Vector store initializes empty immediately
+- Documents loaded on-demand when uploaded via UI
 
 ### 4. Scaling
 - Currently configured for 4 workers

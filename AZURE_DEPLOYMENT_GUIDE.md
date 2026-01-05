@@ -213,23 +213,29 @@ az webapp deployment source config-zip \
 
 ### 1. Vector Store Persistence
 
-**Current Setup**: The application uses Chroma in-memory mode, which means:
-- Vector store is rebuilt on every restart
-- Uploaded documents are lost on restart
+**Current Setup**: The application initializes an empty Chroma vector store on startup, which means:
+- Vector store starts empty on every restart
+- Users upload documents via the UI only
+- Uploaded documents are stored in-memory and lost on restart
+- Optional: If a `documents/` folder exists with .txt files, they are loaded automatically
 
 **Production Recommendation**:
-- Use a persistent vector database (Azure Cosmos DB, Azure AI Search, or Chroma with persistent storage)
+- Use a persistent vector database (Azure Cosmos DB, Azure AI Search, Pinecone, or Chroma with persistent storage)
 - Store uploaded documents in Azure Blob Storage
-- Implement a background job to rebuild the vector store
+- Implement a background job to reload documents from Blob Storage on restart
 
 ### 2. File Storage for Documents
 
-**Current Setup**: Documents are loaded from the `documents/` folder
+**Current Setup**:
+- Vector store initializes empty (no documents required)
+- Users upload documents through the UI
+- Optional: Documents in `documents/` folder are loaded on startup if folder exists
+- No dependency on pre-existing documents for deployment
 
-**Azure Options**:
-- **Option A**: Include documents in deployment (current approach)
-- **Option B**: Store documents in Azure Blob Storage and download on startup
-- **Option C**: Use Azure File Share mounted to `/documents`
+**Azure Options for Production**:
+- **Option A**: Store uploaded files in Azure Blob Storage with metadata
+- **Option B**: Use Azure File Share mounted to `/documents` for persistent storage
+- **Option C**: Use Azure Cosmos DB to store document metadata and Azure Blob for files
 
 ### 3. Scaling Considerations
 

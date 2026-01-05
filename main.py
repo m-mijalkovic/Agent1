@@ -11,7 +11,7 @@ from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
