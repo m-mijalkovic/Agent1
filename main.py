@@ -133,39 +133,50 @@ workflow.add_edge("generate", END)
 workflow.set_entry_point("retrieve")
 rag_chain = workflow.compile()
 
-# Function to load documents on startup
-def load_documents():
-    """Load documents from the documents folder and create vector store"""
+# Function to initialize vector store on startup
+def initialize_vector_store():
+    """Initialize an empty vector store for document uploads via UI"""
     global vector_store
 
-    documents_path = "./documents"
-    if not os.path.exists(documents_path):
-        print(f"Documents folder not found at {documents_path}")
-        return
+    try:
+        # Create an empty Chroma vector store
+        # Using a dummy document to initialize, then we can add real documents via UI
+        vector_store = Chroma(
+            collection_name="company_docs",
+            embedding_function=embeddings
+        )
 
-    # Load documents
-    loader = DirectoryLoader(documents_path, glob="**/*.txt", loader_cls=TextLoader)
-    documents = loader.load()
+        print("Vector store initialized successfully (empty - ready for document uploads via UI)")
 
-    if not documents:
-        print("No documents found in the documents folder")
-        return
+        # Optional: Load documents from folder if they exist (for backward compatibility)
+        documents_path = "./documents"
+        if os.path.exists(documents_path):
+            try:
+                loader = DirectoryLoader(documents_path, glob="**/*.txt", loader_cls=TextLoader)
+                documents = loader.load()
 
-    # Split documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50
-    )
-    splits = text_splitter.split_documents(documents)
+                if documents:
+                    # Split documents into chunks
+                    text_splitter = RecursiveCharacterTextSplitter(
+                        chunk_size=500,
+                        chunk_overlap=50
+                    )
+                    splits = text_splitter.split_documents(documents)
 
-    # Create vector store
-    vector_store = Chroma.from_documents(
-        documents=splits,
-        embedding=embeddings,
-        collection_name="company_docs"
-    )
+                    # Add to vector store
+                    vector_store.add_documents(splits)
+                    print(f"Loaded {len(documents)} documents from folder, split into {len(splits)} chunks")
+                else:
+                    print("Documents folder exists but is empty - use UI to upload documents")
+            except Exception as e:
+                print(f"Could not load documents from folder (this is okay): {str(e)}")
+                print("Use UI to upload documents")
+        else:
+            print("Documents folder not found - use UI to upload documents")
 
-    print(f"Loaded {len(documents)} documents, split into {len(splits)} chunks")
+    except Exception as e:
+        print(f"Error initializing vector store: {str(e)}")
+        raise
 
 app = FastAPI()
 
@@ -188,13 +199,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def read_ui():
     return FileResponse("static/index.html")
 
-# Startup event to load documents
+# Startup event to initialize vector store
 @app.on_event("startup")
 async def startup_event():
-    """Load documents into vector store on application startup"""
-    print("Loading documents into vector store...")
-    load_documents()
-    print("Documents loaded successfully!")
+    """Initialize vector store on application startup"""
+    print("Initializing vector store...")
+    initialize_vector_store()
+    print("Vector store ready!")
 
 # Message model for conversation history
 class Message(BaseModel):
